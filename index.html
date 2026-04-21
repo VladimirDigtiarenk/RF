@@ -2,134 +2,105 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>RF App - Full Version</title>
-
-    <!-- Внешние библиотеки -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>RF App</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/gun/gun.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@700&family=Inter:wght@400;900&display=swap" rel="stylesheet">
-    
     <style>
-        :root { --rf-neon: #00ff41; --rf-birch: #00e5ff; }
-        body { 
-            background-color: #000; color: #fff; 
-            font-family: 'Inter', sans-serif; margin: 0; 
-            overflow: hidden; -webkit-user-select: none;
-        }
-
-        /* Заставка (Splash) */
+        :root { --rf-birch: #00e5ff; }
+        body { background: #000; color: #fff; font-family: sans-serif; margin: 0; overflow: hidden; }
+        
+        /* Заставка - теперь на нее можно нажать, чтобы убрать */
         #splash {
             position: fixed; inset: 0; z-index: 9999;
             background: #000; display: flex; align-items: center; justify-content: center;
-            transition: opacity 0.8s ease;
+            cursor: pointer; transition: opacity 0.6s;
         }
-
-        /* Навигация */
-        .nav-item { opacity: 0.3; transition: 0.3s; cursor: pointer; font-size: 10px; font-weight: 900; }
+        
+        .nav-item { opacity: 0.3; font-size: 10px; font-weight: 900; text-transform: uppercase; }
         .nav-active { opacity: 1; color: var(--rf-birch); }
-
-        /* Элементы интерфейса */
-        .glass { 
-            background: rgba(255,255,255,0.05); 
-            backdrop-filter: blur(15px); 
-            border: 1px solid rgba(255,255,255,0.1); 
-            border-radius: 24px; 
-        }
-
-        /* Скролл рилсов */
-        .rf-scroll { height: 100vh; scroll-snap-type: y mandatory; overflow-y: scroll; scrollbar-width: none; }
-        .rf-scroll::-webkit-scrollbar { display: none; }
-        .rf-slide { height: 100vh; scroll-snap-align: start; position: relative; background: #050505; display: flex; align-items: center; justify-content: center; }
-
-        /* Окно звонка */
-        #call-ui { 
-            display: none; position: fixed; inset: 0; z-index: 5000; 
-            background: #000; flex-direction: column; align-items: center; justify-content: center; 
-        }
-        video { width: 100%; height: 100%; object-fit: cover; background: #111; }
+        .glass { background: rgba(255,255,255,0.05); backdrop-filter: blur(10px); border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); }
+        .page { position: absolute; inset: 0; padding-top: 60px; display: none; }
+        .active-page { display: block; }
     </style>
 </head>
 <body>
 
-    <!-- 1. ЗАСТАВКА -->
-    <div id="splash">
-        <h1 style="font-family: 'Syncopate', sans-serif;" class="text-6xl font-bold text-[#00ff41] animate-pulse">RF</h1>
+    <!-- ЗАСТАВКА (Если не исчезнет сама - нажми на нее) -->
+    <div id="splash" onclick="hideSplash()">
+        <h1 style="color: #00ff41; font-size: 5rem; font-weight: bold; animation: pulse 2s infinite;">RF</h1>
     </div>
 
-    <!-- 2. ОСНОВНОЙ КОНТЕНТ -->
+    <style> @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } } </style>
+
+    <!-- ОСНОВНОЙ ИНТЕРФЕЙС -->
     <div class="h-screen w-full flex flex-col">
-        
-        <main class="flex-1 relative">            <!-- СТРАНИЦА FLOW -->
-            <section id="p-flow" class="rf-scroll absolute inset-0">
-                <div class="rf-slide">
-                    <h2 class="text-white/5 text-9xl font-black italic">RF NODE</h2>
-                    <div class="absolute bottom-28 left-8">
-                        <p class="font-black text-xl uppercase tracking-tighter">RF OFFICIAL</p>
-                        <p class="opacity-40 text-xs mt-1">Decentralized P2P Network v1.0</p>
-                    </div>
+        <main class="flex-1 relative">
+            
+            <!-- FLOW -->
+            <section id="p-flow" class="page active-page flex items-center justify-center">
+                <div class="text-center">
+                    <h2 class="text-white/10 text-8xl font-black italic">RF</h2>
+                    <p class="mt-4 font-bold text-birch uppercase tracking-widest">Decentralized Flow</p>
                 </div>
             </section>
 
-            <!-- СТРАНИЦА MESH -->
-            <section id="p-mesh" class="hidden absolute inset-0 bg-black p-6 pt-20">
-                <h1 class="text-4xl font-black italic mb-8">RF <span class="text-[#00e5ff]">MESH</span></h1>
-                <div class="glass p-5 flex justify-between items-center" onclick="startCall()">
+            <!-- MESH -->
+            <section id="p-mesh" class="page px-6">
+                <h1 class="text-3xl font-black mb-6 italic">RF <span style="color: #00e5ff">MESH</span></h1>
+                <div class="glass p-5 flex justify-between items-center" onclick="alert('P2P соединение...')">
                     <div class="flex items-center">
-                        <div class="w-12 h-12 bg-[#00e5ff] rounded-2xl flex items-center justify-center text-black font-black">GN</div>
-                        <div class="ml-4">
-                            <p class="font-black text-sm">GHOST NODE</p>
-                            <p class="text-[9px] text-[#00e5ff] font-bold uppercase tracking-widest">Active / Encrypted</p>
+                        <div class="w-10 h-10 bg-[#00e5ff] rounded-xl flex items-center justify-center text-black font-black">GN</div>                        <div class="ml-3">
+                            <p class="font-bold text-sm">GHOST NODE</p>
+                            <p class="text-[9px] text-[#00e5ff]">READY TO CONNECT</p>
                         </div>
                     </div>
-                    <button class="text-xl">📞</button>
+                    <span>📞</span>
                 </div>
             </section>
 
-            <!-- СТРАНИЦА PROFILE -->
-            <section id="p-profile" class="hidden absolute inset-0 bg-black p-6 pt-24 text-center">
-                <div class="w-24 h-24 bg-zinc-800 mx-auto rounded-3xl border-2 border-[#00e5ff] mb-6"></div>
-                <h2 class="text-2xl font-black italic">MY NODE</h2>
-                <p id="node-id" class="text-[10px] opacity-30 mt-4 break-all font-mono"></p>
+            <!-- NODE -->
+            <section id="p-profile" class="page text-center px-6">
+                <div class="w-20 h-20 bg-zinc-900 mx-auto rounded-3xl border border-[#00e5ff] mb-4"></div>
+                <h2 class="font-bold">MY NODE</h2>
+                <p id="node-id" class="text-[10px] opacity-30 mt-4 font-mono"></p>
             </section>
+
         </main>
 
-        <!-- 3. НАВИГАЦИЯ -->
-        <nav class="h-20 bg-black/80 backdrop-blur-xl border-t border-white/5 flex items-center justify-around pb-6">
-            <div onclick="showPage('p-flow')" id="nav-flow" class="nav-item nav-active uppercase tracking-widest">Flow</div>
-            <div onclick="showPage('p-mesh')" id="nav-mesh" class="nav-item uppercase tracking-widest">Mesh</div>
-            <div onclick="showPage('p-profile')" id="nav-profile" class="nav-item uppercase tracking-widest">Node</div>
+        <!-- НАВИГАЦИЯ -->
+        <nav class="h-20 bg-black border-t border-white/5 flex items-center justify-around pb-6">
+            <div onclick="showPage('p-flow')" id="nav-flow" class="nav-item nav-active">Flow</div>
+            <div onclick="showPage('p-mesh')" id="nav-mesh" class="nav-item">Mesh</div>
+            <div onclick="showPage('p-profile')" id="nav-profile" class="nav-item">Node</div>
         </nav>
     </div>
 
-    <!-- 4. ОКНО ЗВОНКА -->
-    <div id="call-ui">
-        <video id="local-v" autoplay muted playsinline></video>
-        <button onclick="endCall()" class="absolute bottom-20 w-16 h-16 bg-red-600 rounded-full flex items-center justify-center text-white font-bold text-2xl shadow-2xl">×</button>
-    </div>
-
-    <!-- 5. JAVASCRIPT (ЛОГИКА) — ТЕПЕРЬ ОН ВНУТРИ ФАЙЛА -->
     <script>
-        // Функция, которая запускается при загрузке страницы
-        window.onload = function() {
-            console.log("Приложение RF запущено");
-
-            // Убираем заставку через 1.5 секунды
-            setTimeout(function() {
-                const splash = document.getElementById('splash');
-                if (splash) {
-                    splash.style.opacity = '0';
-                    setTimeout(() => { splash.style.display = 'none'; }, 800);
-                }
-            }, 1500);
-
-            // Генерация ID ноды
-            const nodeIdEl = document.getElementById('node-id');
-            if (nodeIdEl) {
-                nodeIdEl.innerText = 'RF-' + Math.random().toString(36).substr(2, 10).toUpperCase() + '-ADDR';
+        // Функция скрытия заставки
+        function hideSplash() {
+            const s = document.getElementById('splash');
+            if(s) {
+                s.style.opacity = '0';
+                setTimeout(() => s.style.display = 'none', 600);
             }
-        };
+        }
+
+        // Авто-скрытие заставки через 2 секунды
+        setTimeout(hideSplash, 2000);
 
         // Переключение страниц
         function showPage(pageId) {
-            //
+            // Скрываем все
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active-page'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('nav-active'));
+            
+            // Показываем нужную
+            document.getElementById(pageId).classList.add('active-page');
+            document.getElementById('nav-' + pageId.split('-')[1]).classList.add('nav-active');
+        }
+
+        // Генерация ID
+        document.getElementById('node-id').innerText = 'RF-ADDR-' + Math.random().toString(36).substr(2, 10).toUpperCase();
+    </script>
+</body>
+</html>
