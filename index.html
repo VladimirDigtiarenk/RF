@@ -3,104 +3,137 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>RF App</title>
+    <title>RF - Social Node</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gun/gun.js"></script>
     <style>
-        :root { --rf-birch: #00e5ff; }
-        body { background: #000; color: #fff; font-family: sans-serif; margin: 0; overflow: hidden; }
-        
-        /* Заставка - теперь на нее можно нажать, чтобы убрать */
-        #splash {
-            position: fixed; inset: 0; z-index: 9999;
-            background: #000; display: flex; align-items: center; justify-content: center;
-            cursor: pointer; transition: opacity 0.6s;
+        :root {
+            --rf-accent: #007AFF; /* Apple Blue для светлой темы */
+            --rf-bg: #ffffff;
+            --rf-text: #1a1a1a;
         }
+
+        body { 
+            background: var(--rf-bg); 
+            color: var(--rf-text); 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0; overflow: hidden; 
+        }
+
+        /* Лента Рилсов */
+        .reels-container {
+            height: 100vh;
+            scroll-snap-type: y mandatory;
+            overflow-y: scroll;
+            scrollbar-width: none;
+        }
+        .reels-container::-webkit-scrollbar { display: none; }
         
-        .nav-item { opacity: 0.3; font-size: 10px; font-weight: 900; text-transform: uppercase; }
-        .nav-active { opacity: 1; color: var(--rf-birch); }
-        .glass { background: rgba(255,255,255,0.05); backdrop-filter: blur(10px); border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); }
-        .page { position: absolute; inset: 0; padding-top: 60px; display: none; }
+        .reel-video {
+            height: 100vh;
+            scroll-snap-align: start;
+            position: relative;
+            background: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        video { width: 100%; height: 100%; object-fit: cover; }
+
+        /* Интерфейс */
+        .ui-overlay {
+            position: absolute; bottom: 100px; left: 20px; color: white; text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .nav-item { color: #8E8E93; font-size: 11px; font-weight: 600; text-transform: uppercase; transition: 0.3s; }
+        .nav-active { color: var(--rf-accent); }
+
+        .glass-nav {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .page { position: absolute; inset: 0; display: none; background: #fff; padding-top: 60px; }
         .active-page { display: block; }
+
+        /* Кнопка языка */
+        .lang-btn {
+            position: fixed; top: 15px; right: 20px; z-index: 1000;
+            background: rgba(0,0,0,0.05); padding: 5px 12px; border-radius: 20px;
+            font-size: 12px; font-weight: bold; cursor: pointer;
+        }
     </style>
 </head>
 <body>
 
-    <!-- ЗАСТАВКА (Если не исчезнет сама - нажми на нее) -->
-    <div id="splash" onclick="hideSplash()">
-        <h1 style="color: #00ff41; font-size: 5rem; font-weight: bold; animation: pulse 2s infinite;">RF</h1>
-    </div>
+    <!-- КНОПКА ЯЗЫКА -->
+    <div class="lang-btn" onclick="toggleLang()" id="lang-toggle">EN</div>
 
-    <style> @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } } </style>
-
-    <!-- ОСНОВНОЙ ИНТЕРФЕЙС -->
-    <div class="h-screen w-full flex flex-col">
-        <main class="flex-1 relative">
-            
-            <!-- FLOW -->
-            <section id="p-flow" class="page active-page flex items-center justify-center">
-                <div class="text-center">
-                    <h2 class="text-white/10 text-8xl font-black italic">RF</h2>
-                    <p class="mt-4 font-bold text-birch uppercase tracking-widest">Decentralized Flow</p>
+    <!-- 1. FLOW (РИЛСЫ / ИНСТАГРАМ) -->
+    <section id="p-flow" class="page active-page !p-0">        <div class="reels-container">
+            <!-- Видео 1 -->
+            <div class="reel-video">
+                <video src="https://assets.mixkit.co/videos/preview/mixkit-girl-in-neon-lighting-in-the-city-21000-large.mp4" loop muted autoplay playsinline></video>
+                <div class="ui-overlay">
+                    <h3 class="font-bold text-lg">RF Node Alpha</h3>
+                    <p class="text-sm opacity-80" data-key="welcome">Добро пожаловать в будущее</p>
                 </div>
-            </section>
+            </div>
+            <!-- Видео 2 -->
+            <div class="reel-video">
+                <video src="https://assets.mixkit.co/videos/preview/mixkit-tree-with-yellow-leaves-low-angle-shot-1579-large.mp4" loop muted playsinline></video>
+                <div class="ui-overlay">
+                    <h3 class="font-bold text-lg">P2P Network</h3>
+                    <p class="text-sm opacity-80" data-key="p2p_desc">Твой телефон — это сервер</p>
+                </div>
+            </div>
+        </div>
+    </section>
 
-            <!-- MESH -->
-            <section id="p-mesh" class="page px-6">
-                <h1 class="text-3xl font-black mb-6 italic">RF <span style="color: #00e5ff">MESH</span></h1>
-                <div class="glass p-5 flex justify-between items-center" onclick="alert('P2P соединение...')">
-                    <div class="flex items-center">
-                        <div class="w-10 h-10 bg-[#00e5ff] rounded-xl flex items-center justify-center text-black font-black">GN</div>                        <div class="ml-3">
-                            <p class="font-bold text-sm">GHOST NODE</p>
-                            <p class="text-[9px] text-[#00e5ff]">READY TO CONNECT</p>
-                        </div>
+    <!-- 2. MESH (ЧАТЫ / ТЕЛЕГРАМ) -->
+    <section id="p-mesh" class="page px-4">
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-2xl font-black" data-key="mesh_title">Сообщения</h1>
+            <button class="text-blue-500 text-sm font-bold">+</button>
+        </div>
+        
+        <div class="space-y-4">
+            <!-- Пример чата -->
+            <div class="flex items-center p-3 hover:bg-gray-50 rounded-2xl transition" onclick="alert('Чат временно в режиме чтения')">
+                <div class="w-14 h-14 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-bold">RF</div>
+                <div class="ml-4 flex-1 border-b border-gray-100 pb-2">
+                    <div class="flex justify-between">
+                        <span class="font-bold text-sm">RF Support Node</span>
+                        <span class="text-[10px] text-gray-400">12:45</span>
                     </div>
-                    <span>📞</span>
+                    <p class="text-xs text-gray-500 truncate" data-key="last_msg">Система запущена автономно</p>
                 </div>
-            </section>
+            </div>
+        </div>
+    </section>
 
-            <!-- NODE -->
-            <section id="p-profile" class="page text-center px-6">
-                <div class="w-20 h-20 bg-zinc-900 mx-auto rounded-3xl border border-[#00e5ff] mb-4"></div>
-                <h2 class="font-bold">MY NODE</h2>
-                <p id="node-id" class="text-[10px] opacity-30 mt-4 font-mono"></p>
-            </section>
+    <!-- 3. PROFILE (ПРОФИЛЬ) -->
+    <section id="p-profile" class="page px-6 text-center">
+        <div class="w-24 h-24 bg-gray-100 mx-auto rounded-full mb-4 border-2 border-white shadow-lg overflow-hidden">
+            <img src="https://i.pravatar.cc/150?u=myid" class="w-full h-full object-cover">
+        </div>
+        <h2 class="text-xl font-bold italic">User Node</h2>
+        <p id="node-id" class="text-[10px] text-gray-400 mt-2 font-mono">ADDR-...</p>
+        
+        <div class="mt-10 grid grid-cols-3 gap-4 border-t pt-6">
+            <div><p class="font-bold text-lg">0</p><p class="text-[10px] text-gray-400 uppercase" data-key="posts">Посты</p></div>
+            <div><p class="font-bold text-lg">12</p><p class="text-[10px] text-gray-400 uppercase" data-key="nodes">Узлы</p></div>
+            <div><p class="font-bold text-lg">1.2k</p><p class="text-[10px] text-gray-400 uppercase" data-key="mesh">Меш</p></div>
+        </div>
+    </section>
 
-        </main>
-
-        <!-- НАВИГАЦИЯ -->
-        <nav class="h-20 bg-black border-t border-white/5 flex items-center justify-around pb-6">
-            <div onclick="showPage('p-flow')" id="nav-flow" class="nav-item nav-active">Flow</div>
-            <div onclick="showPage('p-mesh')" id="nav-mesh" class="nav-item">Mesh</div>
-            <div onclick="showPage('p-profile')" id="nav-profile" class="nav-item">Node</div>
-        </nav>
-    </div>
-
-    <script>
-        // Функция скрытия заставки
-        function hideSplash() {
-            const s = document.getElementById('splash');
-            if(s) {
-                s.style.opacity = '0';
-                setTimeout(() => s.style.display = 'none', 600);
-            }
-        }
-
-        // Авто-скрытие заставки через 2 секунды
-        setTimeout(hideSplash, 2000);
-
-        // Переключение страниц
-        function showPage(pageId) {
-            // Скрываем все
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active-page'));
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('nav-active'));
-            
-            // Показываем нужную
-            document.getElementById(pageId).classList.add('active-page');
-            document.getElementById('nav-' + pageId.split('-')[1]).classList.add('nav-active');
-        }
-
-        // Генерация ID
-        document.getElementById('node-id').innerText = 'RF-ADDR-' + Math.random().toString(36).substr(2, 10).toUpperCase();
-    </script>
-</body>
-</html>
+    <!-- НАВИГАЦИЯ -->
+    <nav class="fixed bottom-0 w-full h-20 glass-nav flex items-center justify-around pb-6 z-50">
+        <div onclick="showPage('p-flow')" id="nav-flow" class="nav-item nav-active flex flex-col items-center">
+            <div class="text-xl mb-1">🎬</div>
+            <span data-key="nav_flow">Лента</span>
+        </div>
+        <div onclick="showPage('p-mesh')" id="nav-mesh" class="nav-item flex flex-col items-center">
+            <div class="text-x
