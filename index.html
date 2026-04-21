@@ -7,20 +7,16 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="RF">
     
-    <title>RF</title>
+    <title>RF - Decentralized Social</title>
 
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gun/gun.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@700&family=Inter:wght@400;900&display=swap" rel="stylesheet">
+    
     <style>
-        /* Tailwind CSS */
-        /* Встраиваем CDN Tailwind CSS напрямую */
-        /* Если Tailwind не загрузится, это будет наша последняя надежда */
-        @import url('https://cdn.tailwindcss.com');
-
-        /* Google Fonts */
-        @import url('https://fonts.googleapis.com/css2?family=Syncopate:wght@700&family=Inter:wght@400;900&display=swap');
-
         :root {
             --rf-neon: #00ff41;
-            --rf-birch: #00e5ff; /* Березовая галочка */
+            --rf-birch: #00e5ff; 
         }
 
         body {
@@ -32,6 +28,9 @@
             -webkit-user-select: none;
         }
 
+        .text-birch { color: var(--rf-birch); }
+        .bg-birch { background-color: var(--rf-birch); }
+
         .birch-badge {
             background-color: var(--rf-birch);
             width: 15px; height: 15px;
@@ -41,7 +40,7 @@
             margin-left: 6px;
         }
 
-        .nav-item { opacity: 0.3; transition: 0.3s; }
+        .nav-item { opacity: 0.3; transition: 0.3s; cursor: pointer; }
         .nav-active { opacity: 1; color: var(--rf-birch); }
 
         /* Скролл Рилсов */
@@ -70,88 +69,82 @@
 
         .video-main { width: 100%; height: 100%; object-fit: cover; position: absolute; }
         .video-mini { 
-            position: absolute;
-            bottom: 20px;
-            right: 20px;            width: 100px; height: 150px;
-            border-radius: 10px;
-            border: 1px solid rgba(255,255,255,0.2);
-            overflow: hidden;
+            position: absolute; top: 60px; right: 20px;            width: 110px; height: 160px; 
+            border-radius: 24px; border: 2px solid var(--rf-birch); z-index: 10; overflow: hidden;
+            background: #111;
         }
 
-        /* анимация */
-        .animate-pulse { animation: pulse 2s infinite; }
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+        .splash {
+            position: fixed; inset: 0; z-index: 2000;
+            background: #000; display: flex; align-items: center; justify-content: center;
+            transition: 0.8s;
+        }
 
-        .animate-bounce { animation: bounce 1s infinite; }
-        @keyframes bounce { 0%, 100% { transform: translateY(-25%); animation-timing-function: cubic-bezier(0.8, 0, 1, 1); } 50% { transform: none; animation-timing-function: cubic-bezier(0, 0, 0.2, 1); } }
+        .glass {
+            background: rgba(255,255,255,0.03);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 32px;
+        }
 
+        .message-bubble {
+            background: rgba(255,255,255,0.05);
+            padding: 10px 16px;
+            border-radius: 18px;
+            max-width: 80%;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
     </style>
+</head>
+<body>
 
-    <!-- Gun.js (будет работать локально, если CDN недоступен, но мы будем использовать CDN) -->
-    <!-- Мы подгрузим его из CDN, если все будет работать -->
-    <!-- <script src="./node_modules/gun/gun.js"></script> -->
-    
-    <!-- Здесь должна быть логика приложения -->
-    <!-- Эта часть должна быть заменена на реальную логику RF -->
-    <script>
-        // Это заглушка, чтобы показать, что скрипт подключился
-        // Вместо этого здесь должна быть реальная RF логика
-        console.log("RF application script loaded!");
+    <!-- ЗАГРУЗКА -->
+    <div id="splash" class="splash">
+        <h1 style="font-family: 'Syncopate', sans-serif;" class="text-6xl font-bold text-[#00ff41] animate-pulse">RF</h1>
+    </div>
 
-        // Перехватываем переходы по ссылкам, чтобы они открывались в родном приложении
-        document.addEventListener('click', function(event) {
-            const link = event.target.closest('a');
-            if (link && link.href) {
-                const href = link.href;
-                // Проверяем, является ли ссылка внешней (не связана с вашим доменом)
-                // или если это ссылка, которую вы хотите открыть в браузере
-                if (href.startsWith('http') && !href.includes('vladimirdigtiarenko.github.io')) {
-                    // Открываем внешние ссылки в Safari View Controller, если это возможно
-                    // Но для нашего случая, если RF должен открыть что-то, это здесь
-                    // Для нашего RF, все должно работать внутри приложения
-                } else {
-                    // Здесь вы могли бы добавить логику для внутренних переходов,
-                    // но для простого запуска RF это не нужно
-                    // event.preventDefault(); // Если нужно перехватить
-                }
-            }
-        });
+    <!-- ИНТЕРФЕЙС ЗВОНКА -->
+    <div id="call-ui">
+        <video id="remote-v" autoplay playsinline class="video-main"></video>
+        <div class="video-mini">
+            <video id="local-v" autoplay muted playsinline class="w-full h-full object-cover"></video>
+        </div>
+        
+        <div class="z-20 text-center">
+            <h2 id="call-name" class="text-4xl font-black italic uppercase">NODE</h2>
+            <p class="text-birch animate-pulse font-bold text-xs mt-3 tracking-widest">P2P ENCRYPTED</p>
+        </div>
 
-        // Пример логики: если нажать на RF, то вызвать startCall
-        // Это должно быть в реальном RF коде
-        // document.getElementById('main').onclick = () => {
-        //     startCall('USER GHOST', 'u1');
-        // };
+        <button onclick="endCall()" class="z-20 w-20 h-20 bg-red-600 rounded-full flex items-center justify-center shadow-2xl">
+            <svg width="32" height="32" fill="white" viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
+        </button>
+    </div>
 
-        // Реальная RF логика, которая будет использовать Gun.js
-        // Важно: Gun.js должен быть доступен, поэтому лучше его подключать через CDN,
-        // если нет локальной копии.
-        // Пример использования Gun:
-        // const peer = 'https://gun-server.example.com/gun'; // Замените на актуальный пир
-        // const gun = Gun(peer);
-        // gun.get('hello').on((data, key) => {
-        //     console.log('Received data:', data);
-        // });
-    </script>
+    <!-- ОСНОВНОЙ КОНТЕНТ -->
+    <div class="h-screen w-full flex flex-col">
+        
+        <div id="content" class="flex-1 relative">
+            
+            <!-- FLOW (РИЛСЫ) -->
+            <section id="p-flow" class="rf-scroll absolute inset-0">
+                <div class="rf-slide flex items-center justify-center">
+                    <div class="absolute bottom-32 left-8 z-10">
+                        <div class="flex items-center mb-4">
+                            <img src="https://i.pravatar.cc/150?u=rf" class="w-12 h-12 rounded-2xl border-2 border-birch">
+                            <span class="ml-3 font-black text-lg">RF OFFICIAL <span class="birch-badge"></span></span>
+                        </div>
+                        <p class="text-sm opacity-70">Сеть запущена. Каждый телефон — сервер. 🌍</p>
+                    </div>
+                    <div class="absolute right-6 bottom-40 flex flex-col space-y-8 z-10 text-center">
+                        <div><span class="text-3xl">💎</span><p class="text-[10px] font-bold mt-1">100k</p></div>
+                        <div><span class="text-3xl">💬</span><p class="text-[10px] font-bold mt-1">4k</p></div>
+                        <div><span class="text-3xl">🚀</span></div>
+                    </div>
+                    <h2 class="text-white/5 text-8xl font-black italic select-none">RF NODE</h2>
+                </div>
+            </section>
 
-    <script>
-        // Встраиваем Gun.js напрямую как string, если CDN не работает.
-        // Но это может быть слишком объемно. Лучше использовать CDN.
-        // Если CDN сработает, этот скрипт не будет нужен.
-        // Если он не сработает, мы можем вставить сюда содержимое gun.js
-        // Но пока оставим подключение через CDN, так как оно проще.
-
-        // Подключение Gun.js через CDN (уже в <head> выше)
-        // Если проблемы с CDN, то заменим на встроенный код.
-    </script>
-    
-    <script>
-        // Добавляем JS для работы приложения
-        // Здесь должно быть ядро RF логики, которое использует Gun.js,
-        // и управляет UI.
-
-        // Для примера, если у нас есть реальный JS код RF:
-        // <script src="path/to/rf_logic.js"></script>
-
-        // Если ваш RF код весь в index.html, он будет работать.
-        // Но если он в отдельном JS файле, его тоже нужно будет либо
+            <!-- MESH (ЧАТЫ) -->
+            <section id="p-mesh" class="hidden absolute inset-0 pt-20 px-6 bg-black overflow-hidden flex flex-col">
+                <h1
