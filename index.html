@@ -14,92 +14,26 @@
     <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@700&family=Inter:wght@400;900&display=swap" rel="stylesheet">
     
     <style>
-        :root {
-            --rf-neon: #00ff41;
-            --rf-birch: #00e5ff; 
-        }
-
-        body {
-            background-color: #000;
-            color: #fff;
-            font-family: 'Inter', sans-serif;
-            margin: 0; padding: 0;
-            overflow: hidden;
-            -webkit-user-select: none;
-        }
-
+        :root { --rf-neon: #00ff41; --rf-birch: #00e5ff; }
+        body { background-color: #000; color: #fff; font-family: 'Inter', sans-serif; margin: 0; overflow: hidden; -webkit-user-select: none; }
         .text-birch { color: var(--rf-birch); }
         .bg-birch { background-color: var(--rf-birch); }
-
-        .birch-badge {
-            background-color: var(--rf-birch);
-            width: 15px; height: 15px;
-            border-radius: 50%;
-            display: inline-flex; align-items: center; justify-content: center;
-            box-shadow: 0 0 12px var(--rf-birch);
-            margin-left: 6px;
-        }
-
+        .birch-badge { background-color: var(--rf-birch); width: 14px; height: 14px; border-radius: 50%; display: inline-flex; box-shadow: 0 0 10px var(--rf-birch); margin-left: 6px; }
         .nav-item { opacity: 0.3; transition: 0.3s; cursor: pointer; }
         .nav-active { opacity: 1; color: var(--rf-birch); }
-
-        /* Скролл Рилсов */
-        .rf-scroll {
-            height: 100vh;
-            scroll-snap-type: y mandatory;
-            overflow-y: scroll;
-            scrollbar-width: none;
-        }
+        .rf-scroll { height: 100vh; scroll-snap-type: y mandatory; overflow-y: scroll; scrollbar-width: none; }
         .rf-scroll::-webkit-scrollbar { display: none; }
-        .rf-slide {
-            height: 100vh;
-            scroll-snap-align: start;
-            position: relative;
-            background: #050505;
-        }
-
-        /* Звонок */
-        #call-ui {
-            display: none;
-            position: fixed; inset: 0; z-index: 1000;
-            background: rgba(0,0,0,0.98);
-            backdrop-filter: blur(40px);
-            flex-direction: column; align-items: center; justify-content: space-around;
-        }
-
+        .rf-slide { height: 100vh; scroll-snap-align: start; position: relative; background: #050505; }
+        #call-ui { display: none; position: fixed; inset: 0; z-index: 1000; background: rgba(0,0,0,0.95); backdrop-filter: blur(30px); flex-direction: column; align-items: center; justify-content: space-around; }
         .video-main { width: 100%; height: 100%; object-fit: cover; position: absolute; }
-        .video-mini { 
-            position: absolute; top: 60px; right: 20px;            width: 110px; height: 160px; 
-            border-radius: 24px; border: 2px solid var(--rf-birch); z-index: 10; overflow: hidden;
-            background: #111;
-        }
-
-        .splash {
-            position: fixed; inset: 0; z-index: 2000;
-            background: #000; display: flex; align-items: center; justify-content: center;
-            transition: 0.8s;
-        }
-
-        .glass {
-            background: rgba(255,255,255,0.03);
-            backdrop-filter: blur(15px);
-            border: 1px solid rgba(255,255,255,0.08);
-            border-radius: 32px;
-        }
-
-        .message-bubble {
-            background: rgba(255,255,255,0.05);
-            padding: 10px 16px;
-            border-radius: 18px;
-            max-width: 80%;
-            margin-bottom: 8px;
-            font-size: 14px;
-        }
+        .video-mini { position: absolute; top: 60px; right: 20px; width: 100px; height: 150px; border-radius: 20px; border: 2px solid var(--rf-birch); z-index: 10; overflow: hidden; background: #111; }
+        .splash { position: fixed; inset: 0; z-index: 2000; background: #000; display: flex; align-items: center; justify-content: center; transition: 0.5s; opacity: 1; }
+        .glass { background: rgba(255,255,255,0.03); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.08); border-radius: 24px; }        .message-bubble { background: rgba(255,255,255,0.05); padding: 8px 14px; border-radius: 15px; max-width: 80%; margin-bottom: 8px; font-size: 14px; }
     </style>
 </head>
 <body>
 
-    <!-- ЗАГРУЗКА -->
+    <!-- ЗАГРУЗКА (Splash) -->
     <div id="splash" class="splash">
         <h1 style="font-family: 'Syncopate', sans-serif;" class="text-6xl font-bold text-[#00ff41] animate-pulse">RF</h1>
     </div>
@@ -107,44 +41,88 @@
     <!-- ИНТЕРФЕЙС ЗВОНКА -->
     <div id="call-ui">
         <video id="remote-v" autoplay playsinline class="video-main"></video>
-        <div class="video-mini">
-            <video id="local-v" autoplay muted playsinline class="w-full h-full object-cover"></video>
-        </div>
-        
+        <div class="video-mini"><video id="local-v" autoplay muted playsinline class="w-full h-full object-cover"></video></div>
         <div class="z-20 text-center">
-            <h2 id="call-name" class="text-4xl font-black italic uppercase">NODE</h2>
-            <p class="text-birch animate-pulse font-bold text-xs mt-3 tracking-widest">P2P ENCRYPTED</p>
+            <h2 id="call-name" class="text-3xl font-black italic uppercase italic">NODE</h2>
+            <p class="text-birch animate-pulse font-bold text-[10px] mt-2 tracking-widest uppercase">P2P Encrypted</p>
         </div>
-
-        <button onclick="endCall()" class="z-20 w-20 h-20 bg-red-600 rounded-full flex items-center justify-center shadow-2xl">
-            <svg width="32" height="32" fill="white" viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
+        <button onclick="endCall()" class="z-20 w-16 h-16 bg-red-600 rounded-full flex items-center justify-center shadow-2xl">
+            <svg width="28" height="28" fill="white" viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
         </button>
     </div>
 
-    <!-- ОСНОВНОЙ КОНТЕНТ -->
+    <!-- КОНТЕНТ -->
     <div class="h-screen w-full flex flex-col">
-        
         <div id="content" class="flex-1 relative">
             
-            <!-- FLOW (РИЛСЫ) -->
+            <!-- FLOW -->
             <section id="p-flow" class="rf-scroll absolute inset-0">
                 <div class="rf-slide flex items-center justify-center">
                     <div class="absolute bottom-32 left-8 z-10">
-                        <div class="flex items-center mb-4">
-                            <img src="https://i.pravatar.cc/150?u=rf" class="w-12 h-12 rounded-2xl border-2 border-birch">
-                            <span class="ml-3 font-black text-lg">RF OFFICIAL <span class="birch-badge"></span></span>
+                        <div class="flex items-center mb-3">
+                            <img src="https://i.pravatar.cc/100?u=rf" class="w-10 h-10 rounded-xl border-2 border-birch">
+                            <span class="ml-3 font-black text-sm">RF OFFICIAL <span class="birch-badge"></span></span>
                         </div>
-                        <p class="text-sm opacity-70">Сеть запущена. Каждый телефон — сервер. 🌍</p>
+                        <p class="text-xs opacity-60">Сеть запущена. Телефон — это сервер. 🌍</p>
                     </div>
-                    <div class="absolute right-6 bottom-40 flex flex-col space-y-8 z-10 text-center">
-                        <div><span class="text-3xl">💎</span><p class="text-[10px] font-bold mt-1">100k</p></div>
-                        <div><span class="text-3xl">💬</span><p class="text-[10px] font-bold mt-1">4k</p></div>
-                        <div><span class="text-3xl">🚀</span></div>
-                    </div>
-                    <h2 class="text-white/5 text-8xl font-black italic select-none">RF NODE</h2>
+                    <h2 class="text-white/5 text-8xl font-black italic">RF</h2>
                 </div>
             </section>
 
-            <!-- MESH (ЧАТЫ) -->
-            <section id="p-mesh" class="hidden absolute inset-0 pt-20 px-6 bg-black overflow-hidden flex flex-col">
-                <h1
+            <!-- MESH -->
+            <section id="p-mesh" class="hidden absolute inset-0 pt-20 px-6 bg-black flex flex-col">
+                <h1 class="text-3xl font-black mb-6 italic">RF <span class="text-birch">MESH</span></h1>
+                <div id="contact-list" class="space-y-3 flex-1 overflow-y-auto">
+                    <div class="glass p-4 flex justify-between items-center" onclick="openChat('GHOST NODE')">
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 bg-birch rounded-xl flex items-center justify-center text-black font-black text-xs">GN</div>
+                            <div class="ml-3">
+                                <p class="font-black text-sm uppercase">Ghost Node</p>
+                                <p class="text-[9px] text-birch font-bold italic tracking-widest">CONNECTED P2P</p>
+                            </div>
+                        </div>
+                        <button onclick="event.stopPropagation(); startCall('GHOST NODE')" class="p-2 bg-white/5 rounded-full">📞</button>
+                    </div>
+                </div>
+
+                <div id="chat-window" class="hidden fixed inset-0 bg-black z-50 flex flex-col pt-12">
+                    <div class="px-6 flex items-center mb-4"> 
+(chatDb) {
+                chatDb.set({ text: input.value, user: 'Me', time: Date.now() });
+            }
+            input.value = "";
+        }
+
+        function loadMessages() {
+            const msgDiv = document.getElementById('messages');
+            msgDiv.innerHTML = "";
+            if(chatDb) {
+                chatDb.map().once((data) => {
+                    if(!data || !data.text) return;
+                    const b = document.createElement('div');
+                    b.className = "message-bubble " + (data.user === 'Me' ? "self-end border border-birch/20" : "self-start");
+                    b.innerText = data.text;
+                    msgDiv.prepend(b);
+                });
+            }
+        }
+
+        // 5. ЗВОНКИ
+        let stream;
+        async function startCall(name) {
+            document.getElementById('call-name').innerText = name;
+            document.getElementById('call-ui').style.display = 'flex';
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({video: true, audio: true});
+                document.getElementById('local-v').srcObject = stream;
+            } catch(e) { alert("P2P Camera Error"); }
+        }
+        function endCall() {
+            if(stream) stream.getTracks().forEach(t => t.stop());
+            document.getElementById('call-ui').style.display = 'none';
+        }
+
+        document.getElementById('node-id').innerText = 'ADDR-' + Math.random().toString(36).substr(2, 12).toUpperCase();
+    </script>
+</body>
+</html>
