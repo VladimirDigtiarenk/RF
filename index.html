@@ -3,126 +3,133 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="RF">
-    
-    <title>RF - Decentralized Social</title>
+    <title>RF App - Full Version</title>
 
+    <!-- Внешние библиотеки -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/gun/gun.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@700&family=Inter:wght@400;900&display=swap" rel="stylesheet">
     
     <style>
         :root { --rf-neon: #00ff41; --rf-birch: #00e5ff; }
-        body { background-color: #000; color: #fff; font-family: 'Inter', sans-serif; margin: 0; overflow: hidden; -webkit-user-select: none; }
-        .text-birch { color: var(--rf-birch); }
-        .bg-birch { background-color: var(--rf-birch); }
-        .birch-badge { background-color: var(--rf-birch); width: 14px; height: 14px; border-radius: 50%; display: inline-flex; box-shadow: 0 0 10px var(--rf-birch); margin-left: 6px; }
-        .nav-item { opacity: 0.3; transition: 0.3s; cursor: pointer; }
+        body { 
+            background-color: #000; color: #fff; 
+            font-family: 'Inter', sans-serif; margin: 0; 
+            overflow: hidden; -webkit-user-select: none;
+        }
+
+        /* Заставка (Splash) */
+        #splash {
+            position: fixed; inset: 0; z-index: 9999;
+            background: #000; display: flex; align-items: center; justify-content: center;
+            transition: opacity 0.8s ease;
+        }
+
+        /* Навигация */
+        .nav-item { opacity: 0.3; transition: 0.3s; cursor: pointer; font-size: 10px; font-weight: 900; }
         .nav-active { opacity: 1; color: var(--rf-birch); }
+
+        /* Элементы интерфейса */
+        .glass { 
+            background: rgba(255,255,255,0.05); 
+            backdrop-filter: blur(15px); 
+            border: 1px solid rgba(255,255,255,0.1); 
+            border-radius: 24px; 
+        }
+
+        /* Скролл рилсов */
         .rf-scroll { height: 100vh; scroll-snap-type: y mandatory; overflow-y: scroll; scrollbar-width: none; }
         .rf-scroll::-webkit-scrollbar { display: none; }
-        .rf-slide { height: 100vh; scroll-snap-align: start; position: relative; background: #050505; }
-        #call-ui { display: none; position: fixed; inset: 0; z-index: 1000; background: rgba(0,0,0,0.95); backdrop-filter: blur(30px); flex-direction: column; align-items: center; justify-content: space-around; }
-        .video-main { width: 100%; height: 100%; object-fit: cover; position: absolute; }
-        .video-mini { position: absolute; top: 60px; right: 20px; width: 100px; height: 150px; border-radius: 20px; border: 2px solid var(--rf-birch); z-index: 10; overflow: hidden; background: #111; }
-        .splash { position: fixed; inset: 0; z-index: 2000; background: #000; display: flex; align-items: center; justify-content: center; transition: 0.5s; opacity: 1; }
-        .glass { background: rgba(255,255,255,0.03); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.08); border-radius: 24px; }        .message-bubble { background: rgba(255,255,255,0.05); padding: 8px 14px; border-radius: 15px; max-width: 80%; margin-bottom: 8px; font-size: 14px; }
+        .rf-slide { height: 100vh; scroll-snap-align: start; position: relative; background: #050505; display: flex; align-items: center; justify-content: center; }
+
+        /* Окно звонка */
+        #call-ui { 
+            display: none; position: fixed; inset: 0; z-index: 5000; 
+            background: #000; flex-direction: column; align-items: center; justify-content: center; 
+        }
+        video { width: 100%; height: 100%; object-fit: cover; background: #111; }
     </style>
 </head>
 <body>
 
-    <!-- ЗАГРУЗКА (Splash) -->
-    <div id="splash" class="splash">
+    <!-- 1. ЗАСТАВКА -->
+    <div id="splash">
         <h1 style="font-family: 'Syncopate', sans-serif;" class="text-6xl font-bold text-[#00ff41] animate-pulse">RF</h1>
     </div>
 
-    <!-- ИНТЕРФЕЙС ЗВОНКА -->
-    <div id="call-ui">
-        <video id="remote-v" autoplay playsinline class="video-main"></video>
-        <div class="video-mini"><video id="local-v" autoplay muted playsinline class="w-full h-full object-cover"></video></div>
-        <div class="z-20 text-center">
-            <h2 id="call-name" class="text-3xl font-black italic uppercase italic">NODE</h2>
-            <p class="text-birch animate-pulse font-bold text-[10px] mt-2 tracking-widest uppercase">P2P Encrypted</p>
-        </div>
-        <button onclick="endCall()" class="z-20 w-16 h-16 bg-red-600 rounded-full flex items-center justify-center shadow-2xl">
-            <svg width="28" height="28" fill="white" viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
-        </button>
-    </div>
-
-    <!-- КОНТЕНТ -->
+    <!-- 2. ОСНОВНОЙ КОНТЕНТ -->
     <div class="h-screen w-full flex flex-col">
-        <div id="content" class="flex-1 relative">
-            
-            <!-- FLOW -->
+        
+        <main class="flex-1 relative">            <!-- СТРАНИЦА FLOW -->
             <section id="p-flow" class="rf-scroll absolute inset-0">
-                <div class="rf-slide flex items-center justify-center">
-                    <div class="absolute bottom-32 left-8 z-10">
-                        <div class="flex items-center mb-3">
-                            <img src="https://i.pravatar.cc/100?u=rf" class="w-10 h-10 rounded-xl border-2 border-birch">
-                            <span class="ml-3 font-black text-sm">RF OFFICIAL <span class="birch-badge"></span></span>
-                        </div>
-                        <p class="text-xs opacity-60">Сеть запущена. Телефон — это сервер. 🌍</p>
+                <div class="rf-slide">
+                    <h2 class="text-white/5 text-9xl font-black italic">RF NODE</h2>
+                    <div class="absolute bottom-28 left-8">
+                        <p class="font-black text-xl uppercase tracking-tighter">RF OFFICIAL</p>
+                        <p class="opacity-40 text-xs mt-1">Decentralized P2P Network v1.0</p>
                     </div>
-                    <h2 class="text-white/5 text-8xl font-black italic">RF</h2>
                 </div>
             </section>
 
-            <!-- MESH -->
-            <section id="p-mesh" class="hidden absolute inset-0 pt-20 px-6 bg-black flex flex-col">
-                <h1 class="text-3xl font-black mb-6 italic">RF <span class="text-birch">MESH</span></h1>
-                <div id="contact-list" class="space-y-3 flex-1 overflow-y-auto">
-                    <div class="glass p-4 flex justify-between items-center" onclick="openChat('GHOST NODE')">
-                        <div class="flex items-center">
-                            <div class="w-10 h-10 bg-birch rounded-xl flex items-center justify-center text-black font-black text-xs">GN</div>
-                            <div class="ml-3">
-                                <p class="font-black text-sm uppercase">Ghost Node</p>
-                                <p class="text-[9px] text-birch font-bold italic tracking-widest">CONNECTED P2P</p>
-                            </div>
+            <!-- СТРАНИЦА MESH -->
+            <section id="p-mesh" class="hidden absolute inset-0 bg-black p-6 pt-20">
+                <h1 class="text-4xl font-black italic mb-8">RF <span class="text-[#00e5ff]">MESH</span></h1>
+                <div class="glass p-5 flex justify-between items-center" onclick="startCall()">
+                    <div class="flex items-center">
+                        <div class="w-12 h-12 bg-[#00e5ff] rounded-2xl flex items-center justify-center text-black font-black">GN</div>
+                        <div class="ml-4">
+                            <p class="font-black text-sm">GHOST NODE</p>
+                            <p class="text-[9px] text-[#00e5ff] font-bold uppercase tracking-widest">Active / Encrypted</p>
                         </div>
-                        <button onclick="event.stopPropagation(); startCall('GHOST NODE')" class="p-2 bg-white/5 rounded-full">📞</button>
                     </div>
+                    <button class="text-xl">📞</button>
                 </div>
+            </section>
 
-                <div id="chat-window" class="hidden fixed inset-0 bg-black z-50 flex flex-col pt-12">
-                    <div class="px-6 flex items-center mb-4"> 
-(chatDb) {
-                chatDb.set({ text: input.value, user: 'Me', time: Date.now() });
+            <!-- СТРАНИЦА PROFILE -->
+            <section id="p-profile" class="hidden absolute inset-0 bg-black p-6 pt-24 text-center">
+                <div class="w-24 h-24 bg-zinc-800 mx-auto rounded-3xl border-2 border-[#00e5ff] mb-6"></div>
+                <h2 class="text-2xl font-black italic">MY NODE</h2>
+                <p id="node-id" class="text-[10px] opacity-30 mt-4 break-all font-mono"></p>
+            </section>
+        </main>
+
+        <!-- 3. НАВИГАЦИЯ -->
+        <nav class="h-20 bg-black/80 backdrop-blur-xl border-t border-white/5 flex items-center justify-around pb-6">
+            <div onclick="showPage('p-flow')" id="nav-flow" class="nav-item nav-active uppercase tracking-widest">Flow</div>
+            <div onclick="showPage('p-mesh')" id="nav-mesh" class="nav-item uppercase tracking-widest">Mesh</div>
+            <div onclick="showPage('p-profile')" id="nav-profile" class="nav-item uppercase tracking-widest">Node</div>
+        </nav>
+    </div>
+
+    <!-- 4. ОКНО ЗВОНКА -->
+    <div id="call-ui">
+        <video id="local-v" autoplay muted playsinline></video>
+        <button onclick="endCall()" class="absolute bottom-20 w-16 h-16 bg-red-600 rounded-full flex items-center justify-center text-white font-bold text-2xl shadow-2xl">×</button>
+    </div>
+
+    <!-- 5. JAVASCRIPT (ЛОГИКА) — ТЕПЕРЬ ОН ВНУТРИ ФАЙЛА -->
+    <script>
+        // Функция, которая запускается при загрузке страницы
+        window.onload = function() {
+            console.log("Приложение RF запущено");
+
+            // Убираем заставку через 1.5 секунды
+            setTimeout(function() {
+                const splash = document.getElementById('splash');
+                if (splash) {
+                    splash.style.opacity = '0';
+                    setTimeout(() => { splash.style.display = 'none'; }, 800);
+                }
+            }, 1500);
+
+            // Генерация ID ноды
+            const nodeIdEl = document.getElementById('node-id');
+            if (nodeIdEl) {
+                nodeIdEl.innerText = 'RF-' + Math.random().toString(36).substr(2, 10).toUpperCase() + '-ADDR';
             }
-            input.value = "";
-        }
+        };
 
-        function loadMessages() {
-            const msgDiv = document.getElementById('messages');
-            msgDiv.innerHTML = "";
-            if(chatDb) {
-                chatDb.map().once((data) => {
-                    if(!data || !data.text) return;
-                    const b = document.createElement('div');
-                    b.className = "message-bubble " + (data.user === 'Me' ? "self-end border border-birch/20" : "self-start");
-                    b.innerText = data.text;
-                    msgDiv.prepend(b);
-                });
-            }
-        }
-
-        // 5. ЗВОНКИ
-        let stream;
-        async function startCall(name) {
-            document.getElementById('call-name').innerText = name;
-            document.getElementById('call-ui').style.display = 'flex';
-            try {
-                stream = await navigator.mediaDevices.getUserMedia({video: true, audio: true});
-                document.getElementById('local-v').srcObject = stream;
-            } catch(e) { alert("P2P Camera Error"); }
-        }
-        function endCall() {
-            if(stream) stream.getTracks().forEach(t => t.stop());
-            document.getElementById('call-ui').style.display = 'none';
-        }
-
-        document.getElementById('node-id').innerText = 'ADDR-' + Math.random().toString(36).substr(2, 12).toUpperCase();
-    </script>
-</body>
-</html>
+        // Переключение страниц
+        function showPage(pageId) {
+            //
