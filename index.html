@@ -3,11 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>RF: SUPREME EMPIRE V16</title>
+    <title>RF: SUPREME EMPIRE V17</title>
     
-    <!-- ИИ и База Данных -->
-    <script src="https://jsdelivr.net"></script>
-    <script src="https://jsdelivr.net"></script>
     <script src="https://tailwindcss.com"></script>
     <script src="https://jsdelivr.net"></script>
     <script src="https://jsdelivr.net"></script>
@@ -17,98 +14,94 @@
     <style>
         :root { --rf-accent: #007AFF; --rf-gold: #FFD700; }
         * { -webkit-tap-highlight-color: transparent; outline: none; box-sizing: border-box; }
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background: #fff; margin: 0; overflow: hidden; -webkit-user-select: none; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: #fff; margin: 0; overflow: hidden; }
 
-        /* Система страниц PWA */
-        .page { position: absolute; inset: 0; display: none; padding-top: env(safe-area-inset-top, 100px); padding-bottom: 100px; overflow-y: auto; background: #fff; }
-        .active-page { display: block; animation: pageIn 0.4s cubic-bezier(0.1, 0.7, 0.1, 1); }
-        @keyframes pageIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+        /* Мгновенная загрузка страниц */
+        .page { position: absolute; inset: 0; display: none; padding-top: 100px; padding-bottom: 100px; overflow-y: auto; background: #fff; }
+        .active-page { display: block; animation: fastIn 0.2s ease-out; }
+        @keyframes fastIn { from { opacity: 0; } to { opacity: 1; } }
 
-        .glass { background: rgba(255,255,255,0.85); backdrop-filter: blur(25px); border-bottom: 0.5px solid rgba(0,0,0,0.05); z-index: 1000; }
-        .founder-card { border: 2px solid var(--rf-gold) !important; background: linear-gradient(180deg, #fff 0%, #fffdf0 100%); }
-        .founder-label { background: #000; color: var(--rf-gold); font-size: 8px; padding: 2px 8px; border-radius: 6px; font-weight: 900; }
+        /* Плавный прогресс-бар */
+        #loader-wrap { position: fixed; inset: 0; background: #fff; z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: 0.5s; }
+        #progress-bar { width: 200px; height: 3px; background: #f0f0f0; border-radius: 10px; overflow: hidden; margin-top: 20px; }
+        #progress-fill { width: 0%; height: 100%; background: #000; transition: 0.3s; }
         
-        #ai-scanner { display: none; position: fixed; inset: 0; background: rgba(255,255,255,0.95); z-index: 5000; flex-direction: column; align-items: center; justify-content: center; }
-        #global-alert { display: none; position: fixed; top: 20px; inset-x: 10px; background: #000; color: #fff; padding: 20px; border-radius: 28px; z-index: 10000; border: 1px solid var(--rf-gold); animation: slideDown 0.5s ease; }
-        @keyframes slideDown { from { transform: translateY(-100%); } to { transform: translateY(0); } }
+        .founder-tag { background: #000; color: var(--rf-gold); font-size: 8px; padding: 2px 8px; border-radius: 6px; font-weight: 900; }
+        .glass { background: rgba(255,255,255,0.8); backdrop-filter: blur(20px); border-bottom: 0.5px solid #eee; z-index: 1000; }
     </style>
 </head>
 <body>
 
-    <!-- Уведомления от Основателя -->
-    <div id="global-alert">
+    <!-- УМНЫЙ ЗАГРУЗЧИК -->
+    <div id="loader-wrap">
+        <h1 class="text-6xl font-black italic tracking-tighter">RF</h1>
+        <div id="progress-bar"><div id="progress-fill"></div></div>
+        <p id="loader-status" class="mt-4 text-[10px] font-bold uppercase tracking-widest text-gray-400">Инициализация ноды...</p>
+    </div>
+
+    <!-- ГОЛОС ОСНОВАТЕЛЯ -->
+    <div id="global-alert" class="fixed top-6 inset-x-4 z-[10001] bg-black text-white p-6 rounded-[30px] border border-yellow-500 shadow-2xl hidden animate-bounce">
         <div class="flex items-center gap-2 mb-2 text-yellow-400">
             <i data-lucide="shield-check" class="w-4 h-4"></i>
             <span class="text-[10px] font-black uppercase tracking-widest">RF Founder Voice</span>
         </div>
         <p id="alert-text" class="text-sm font-bold"></p>
-        <button onclick="this.parentElement.style.display='none'" class="mt-4 text-[10px] opacity-50 font-black uppercase">Принято</button>
+        <button onclick="this.parentElement.style.display='none'" class="mt-4 text-[10px] opacity-50 uppercase font-black">Принято</button>
     </div>
 
-    <!-- ИИ Сканер -->
-    <div id="ai-scanner">
-        <div class="w-10 h-10 border-4 border-black border-t-transparent rounded-full animate-spin"></div>
-        <p class="mt-4 text-[10px] font-black uppercase tracking-widest">ИИ проверяет безопасность...</p>
-    </div>
-
-    <!-- HEADER -->
+    <!-- ШАПКА -->
     <header class="fixed top-0 inset-x-0 h-[100px] glass flex items-end justify-between px-6 pb-4">
         <div class="flex flex-col">
-            <span class="text-[9px] font-black text-blue-500 uppercase tracking-[0.2em]">Empire Protocol</span>
+            <span class="text-[9px] font-black text-blue-500 uppercase tracking-widest">Global Protocol</span>
             <h1 id="header-title" class="text-2xl font-black italic tracking-tighter uppercase">FLOW</h1>
         </div>
-        <img id="my-avatar" class="w-10 h-10 rounded-full bg-gray-50 border border-gray-100 object-cover" onclick="showPage('profile')">
+        <img id="my-avatar" class="w-10 h-10 rounded-full border border-gray-100 object-cover bg-gray-50" onclick="showPage('profile')">
     </header>
 
     <main class="h-screen relative">
-        <!-- FLOW (ЛЕНТА) -->
         <section id="p-flow" class="page active-page">
             <div id="feed" class="flex flex-col pb-24"></div>
         </section>
 
-        <!-- DIRECT (ЛИЧКА) -->
         <section id="p-direct" class="page px-6">
             <div class="flex gap-2 my-4">
-                <input type="text" id="search-u" class="flex-1 p-5 bg-gray-50 rounded-3xl text-sm outline-none" placeholder="Поиск ноды по нику...">
-                <button onclick="openDirect(document.getElementById('search-u').value)" class="w-14 h-14 bg-black text-white rounded-3xl flex items-center justify-center shadow-lg"><i data-lucide="message-square"></i></button>
+                <input type="text" id="search-u" class="flex-1 p-5 bg-gray-50 rounded-[24px] text-sm outline-none" placeholder="Поиск ника...">
+                <button onclick="openChat(document.getElementById('search-u').value)" class="w-14 h-14 bg-black text-white rounded-[24px] flex items-center justify-center"><i data-lucide="message-square"></i></button>
             </div>
-            <div id="chat-list" class="space-y-4"></div>
+            <div id="chat-list"></div>
         </section>
 
-        <!-- PROFILE -->
         <section id="p-profile" class="page px-8 text-center">
             <div class="mt-12 flex flex-col items-center">
                 <div class="relative">
-                    <img id="prof-img" class="w-32 h-32 rounded-full border-4 border-white shadow-2xl bg-gray-50">
+                    <img id="prof-img" class="w-32 h-32 rounded-full border-4 border-white shadow-2xl">
                     <div id="v-icon" class="hidden absolute bottom-2 right-2 w-8 h-8 bg-blue-400 rounded-full border-4 border-white flex items-center justify-center text-xs text-white font-black">✓</div>
                 </div>
                 <h2 class="text-3xl font-black italic mt-4" id="prof-name">Username</h2>
-                <div id="founder-tag" class="hidden founder-label">ОСНОВАТЕЛЬ</div>
+                <div id="founder-tag" class="hidden founder-tag">ОСНОВАТЕЛЬ</div>
 
-                <!-- Управление Основателя -->
-                <div id="founder-panel" class="hidden w-full mt-8 p-6 bg-yellow-50 rounded-[32px] border border-yellow-200">
-                    <input type="text" id="global-input" class="w-full p-4 bg-white rounded-2xl text-xs mb-3 outline-none" placeholder="Сообщение всей империи...">
-                    <button onclick="broadcastAlert()" class="w-full p-4 bg-yellow-400 text-black font-black rounded-2xl text-[10px] uppercase">Оповестить всех</button>
+                <div id="founder-controls" class="hidden w-full mt-6 space-y-2 p-4 bg-yellow-50 rounded-[30px]">
+                    <input id="broadcast-msg" class="w-full p-4 bg-white rounded-2xl text-xs outline-none" placeholder="Сообщение всем...">
+                    <button onclick="sendEmpireBroadcast()" class="w-full p-4 bg-yellow-400 text-black font-black rounded-2xl text-[10px] uppercase">Оповестить</button>
                 </div>
                 
-                <button onclick="donateGEM()" class="mt-6 w-full p-5 bg-black text-yellow-400 rounded-[24px] font-black text-xs border border-yellow-400 flex items-center justify-center gap-2">
+                <button onclick="copyWallet()" class="mt-6 w-full p-5 bg-black text-yellow-400 rounded-[24px] font-black text-xs border border-yellow-400 flex items-center justify-center gap-2">
                     <i data-lucide="gem" class="w-4 h-4"></i> ПОДДЕРЖАТЬ RF (USDT)
                 </button>
 
                 <div class="flex gap-4 mt-8 w-full">
-                    <div class="flex-1 p-4 bg-gray-50 rounded-[28px]"><p class="font-black text-xl" id="follower-count">0</p><p class="text-[9px] text-gray-400 font-bold uppercase">Подписчики</p></div>
-                    <div class="flex-1 p-4 bg-gray-50 rounded-[28px]"><p class="font-black text-xl" id="following-count">0</p><p class="text-[9px] text-gray-400 font-bold uppercase">Подписки</p></div>
+                    <div class="flex-1 p-4 bg-gray-50 rounded-[28px]"><p class="font-black text-xl" id="follower-count">0</p><p class="text-[9px] text-gray-400 font-bold uppercase">Followers</p></div>
+                    <div class="flex-1 p-4 bg-gray-50 rounded-[28px]"><p class="font-black text-xl" id="following-count">0</p><p class="text-[9px] text-gray-400 font-bold uppercase">Following</p></div>
                 </div>
-                <div id="prof-grid" class="grid grid-cols-3 gap-1 mt-8 w-full pb-20"></div>
+                <div id="prof-grid" class="grid grid-cols-3 gap-1 mt-8 pb-24 w-full"></div>
             </div>
         </section>
     </main>
 
-    <!-- ЧАТ МОДАЛ -->
-    <div id="chat-modal" class="fixed inset-0 bg-white z-[5000] hidden flex flex-col">
+    <div id="chat-modal" class="fixed inset-0 bg-white z-[2000] hidden flex flex-col">
         <header class="h-[100px] glass flex items-end justify-between px-6 pb-4">
             <button onclick="document.getElementById('chat-modal').classList.add('hidden')"><i data-lucide="chevron-left"></i></button>
-            <h2 id="chat-target-name" class="text-lg font-black uppercase">Chat</h2>
+            <h2 id="chat-title" class="text-lg font-black uppercase">Chat</h2>
             <div class="w-6"></div>
         </header>
         <div id="chat-msgs" class="flex-1 overflow-y-auto p-6 flex flex-col gap-3"></div>
@@ -118,89 +111,136 @@
         </div>
     </div>
 
-    <!-- КНОПКА ПОСТА -->
     <label class="fixed right-6 bottom-28 w-16 h-16 bg-black text-white rounded-full flex items-center justify-center shadow-2xl z-50 active:scale-90 transition cursor-pointer">
-        <i data-lucide="camera" class="w-8 h-8"></i>
-        <input type="file" id="media-file" class="hidden" accept="image/*" onchange="handleUpload(this)">
+        <i data-lucide="camera"></i>
+        <input type="file" id="media-input" class="hidden" accept="image/*" onchange="uploadSecure(this)">
     </label>
 
-    <!-- NAVIGATION -->
     <nav class="fixed bottom-0 inset-x-0 h-[95px] glass flex justify-around items-center pb-8">
-        <button onclick="showPage('flow')"><i data-lucide="aperture"></i></button>
+        <button onclick="showPage('flow')"><i data-lucide="layout-grid"></i></button>
         <button onclick="showPage('direct')"><i data-lucide="send"></i></button>
         <button onclick="showPage('profile')"><i data-lucide="user"></i></button>
     </nav>
 
+    <!-- AUTH -->
+    <div id="auth-screen" class="fixed inset-0 bg-white z-[5000] p-10 flex flex-col justify-center hidden">
+        <h2 class="text-5xl font-black italic tracking-tighter mb-10">RF</h2>
+        <input type="text" id="node-alias" class="w-full p-6 bg-gray-50 rounded-[24px] font-bold mb-4 outline-none" placeholder="Username">
+        <input type="password" id="node-pass" class="w-full p-6 bg-gray-50 rounded-[24px] font-bold mb-8 outline-none" placeholder="Password">
+        <button onclick="authNode()" class="w-full p-6 bg-black text-white rounded-[24px] font-black shadow-xl">ACTIVATE</button>
+    </div>
+
     <script>
-        const gun = Gun(['https://herokuapp.com']);
+        // Инициализация Gun с несколькими релеями для скорости
+        const gun = Gun(['https://herokuapp.com', 'https://herokuapp.com']);
         const user = gun.user().recall({localStorage: true});
-        
-        // --- ДАННЫЕ ИМПЕРИИ ---
         const FOUNDER = "Vladimir Digtiarenko";
         const WALLET = "TPiP2CXwrgZUMNLAShfru6NGNwmqAXgi8h";
-        
-        let myNick = "", activeChat = "", nsfwModel;
+        let myNick = "", activeChat = "", nsfwModel = null;
 
-        async function initAI() {
-            nsfwModel = await nsfwjs.load();
-            lucide.createIcons();
-        }
-        initAI();
-
-        window.onload = () => {
-            setTimeout(() => {
-                document.body.classList.add('loaded');
-                if (!user.is) document.getElementById('auth-screen').classList.remove('hidden');
-                else startEmpire();
-            }, 1000);
+        // Пошаговый лоадер
+        const progress = (p, text) => {
+            document.getElementById('progress-fill').style.width = p + '%';
+            document.getElementById('loader-status').innerText = text;
         };
 
-        function initNode() {
-            const a = document.getElementById('node-alias').value;
-            const p = document.getElementById('node-pass').value;
-            user.auth(a, p, (ack) => {
-                if (ack.err) user.create(a, p, () => {
-                    user.auth(a, p, () => {
-                        gun.get('rf_fol_v16').get(FOUNDER).get(a).put(true);
-                        gun.get('rf_following_v16').get(a).get(FOUNDER).put(true);
-                        location.reload();
-                    });
-                });
-                else location.reload();
-            });
-        }
+        window.onload = async () => {
+            progress(20, "Подключение к Mesh...");
+            lucide.createIcons();
+            
+            setTimeout(() => {
+                progress(50, "Синхронизация профиля...");
+                if (!user.is) {
+                    document.getElementById('loader-wrap').style.opacity = '0';
+                    setTimeout(() => {
+                        document.getElementById('loader-wrap').style.display = 'none';
+                        document.getElementById('auth-screen').classList.remove('hidden');
+                    }, 500);
+                } else {
+                    startApp();
+                }
+            }, 800);
+        };
 
-        function startEmpire() {
+        async function startApp() {
             myNick = user.is.alias;
             const av = `https://dicebear.com{myNick}`;
-            document.getElementById('my-avatar').src = av;
             document.getElementById('prof-img').src = av;
+            document.getElementById('my-avatar').src = av;
             document.getElementById('prof-name').innerText = myNick;
             document.getElementById('auth-screen').classList.add('hidden');
+
+            progress(80, "Загрузка ленты...");
             
             if(myNick === FOUNDER) {
                 document.getElementById('founder-tag').classList.remove('hidden');
-                document.getElementById('founder-panel').classList.remove('hidden');
+                document.getElementById('founder-controls').classList.remove('hidden');
                 document.getElementById('v-icon').classList.remove('hidden');
             } else {
-                gun.get('rf_fol_v16').get(FOUNDER).get(myNick).put(true);
-                gun.get('rf_following_v16').get(myNick).get(FOUNDER).put(true);
+                gun.get('rf_fol_v17').get(FOUNDER).get(myNick).put(true);
+                gun.get('rf_following_v17').get(myNick).get(FOUNDER).put(true);
             }
+
+            // Фоновая загрузка тяжелого ИИ (не блокирует вход)
+            setTimeout(async () => {
+                const script = document.createElement('script');
+                script.src = "https://jsdelivr.net";
+                script.onload = async () => {
+                    const tf = document.createElement('script');
+                    tf.src = "https://jsdelivr.net";
+                    tf.onload = async () => { nsfwModel = await nsfwjs.load(); console.log("AI Shield Background Ready"); };
+                    document.head.appendChild(tf);
+                };
+                document.head.appendChild(script);
+            }, 2000);
+
+            sync();
             
-            // Глобальный голос
-            gun.get('rf_global_v16').on(data => {
+            progress(100, "Готово");
+            setTimeout(() => {
+                document.getElementById('loader-wrap').style.opacity = '0';
+                setTimeout(() => document.getElementById('loader-wrap').style.display = 'none', 500);
+            }, 500);
+        }
+
+        function sync() {
+            const seen = new Set();
+            gun.get('rf_v17_posts').map().on((data, id) => {
+                if(!data || !data.img || seen.has(id)) return;
+                seen.add(id);
+                const isF = data.by === FOUNDER;
+                const html = `<div class="mb-4 border-b border-gray-50 pb-4">
+                    <div class="flex items-center p-4 gap-3">
+                        <img src="https://dicebear.com{data.by}" class="w-8 h-8 rounded-full border">
+                        <span class="font-bold text-sm flex items-center">${data.by} ${isF ? '<div class="verify-badge">✓</div>' : ''}</span>
+                    </div>
+                    <img src="${data.img}" class="w-full aspect-square object-cover shadow-sm">
+                </div>`;
+                document.getElementById('feed').insertAdjacentHTML('afterbegin', html);
+                if(data.by === myNick) document.getElementById('prof-grid').insertAdjacentHTML('afterbegin', `<img src="${data.img}" class="aspect-square object-cover">`);
+            });
+
+            gun.get('rf_global_v17').on(data => {
                 if(data && data.txt) {
                     document.getElementById('alert-text').innerText = data.txt;
                     document.getElementById('global-alert').style.display = 'block';
+                    setTimeout(() => document.getElementById('global-alert').style.display = 'none', 10000);
                 }
             });
-            sync();
+
+            gun.get('rf_fol_v17').get(myNick).on(f => {
+                const count = f ? Object.keys(f).filter(k => f[k]).length : 0;
+                document.getElementById('follower-count').innerText = count;
+            });
+            gun.get('rf_following_v17').get(myNick).on(f => {
+                const count = f ? Object.keys(f).filter(k => f[k]).length : 0;
+                document.getElementById('following-count').innerText = count;
+            });
         }
 
-        async function handleUpload(input) {
+        async function uploadSecure(input) {
             const file = input.files[0];
             if(!file) return;
-            document.getElementById('ai-scanner').style.display = 'flex';
             
             const reader = new FileReader();
             reader.onload = async (e) => {
@@ -208,67 +248,44 @@
                 img.src = e.target.result;
                 await new Promise(r => img.onload = r);
                 
-                // ИИ Скан
-                if(myNick !== FOUNDER) {
-                    const predictions = await nsfwModel.classify(img);
-                    if(predictions.some(p => (p.className==='Porn'||p.className==='Hentai') && p.probability > 0.6)) {
-                        document.getElementById('ai-scanner').style.display = 'none';
-                        return alert("БЛОКИРОВКА: Обнаружен запрещенный контент!");
-                    }
-                }
-                
-                // Сжатие
+                // Сжатие для скорости
                 const canvas = document.createElement('canvas');
-                const ctx = canvas.getContext('2d');
                 canvas.width = 1000; canvas.height = 1000;
-                ctx.drawImage(img, 0, 0, 1000, 1000);
+                canvas.getContext('2d').drawImage(img, 0, 0, 1000, 1000);
                 const optimized = canvas.toDataURL('image/jpeg', 0.7);
-                
-                const id = Gun.text.random(14);
-                gun.get('rf_v16_posts').get(id).put({ id, img: optimized, by: myNick, at: Date.now() });
-                document.getElementById('ai-scanner').style.display = 'none';
+
+                if(myNick !== FOUNDER && nsfwModel) {
+                    const pred = await nsfwModel.classify(img);
+                    if(pred.some(p => (p.className==='Porn'||p.className==='Hentai') && p.probability > 0.6)) return alert("Content Blocked!");
+                }
+
+                gun.get('rf_v17_posts').set({ id: Gun.text.random(), img: optimized, by: myNick, at: Date.now() });
                 showPage('flow');
             };
             reader.readAsDataURL(file);
         }
 
-        function sync() {
-            const seen = new Set();
-            gun.get('rf_v16_posts').map().on((data, id) => {
-                if(!data || !data.img || seen.has(id)) return;
-                seen.add(id);
-                const isF = data.by === FOUNDER;
-                const html = `<div class="mb-2 border-b border-gray-50 pb-4">
-                    <div class="flex items-center p-4 gap-3">
-                        <img src="https://dicebear.com{data.by}" class="w-8 h-8 rounded-full border">
-                        <span class="font-bold text-sm flex items-center">${data.by} ${isF ? '<div class="verify-badge">✓</div>' : ''}</span>
-                    </div>
-                    <img src="${data.img}" class="w-full aspect-square object-cover">
-                </div>`;
-                document.getElementById('feed').insertAdjacentHTML('afterbegin', html);
-                if(data.by === myNick) document.getElementById('prof-grid').insertAdjacentHTML('afterbegin', `<img src="${data.img}" class="aspect-square object-cover">`);
-            });
-            
-            gun.get('rf_fol_v16').get(myNick).on(f => {
-                const count = f ? Object.keys(f).filter(k => f[k]).length : 0;
-                document.getElementById('follower-count').innerText = count;
-            });
-            gun.get('rf_following_v16').get(myNick).on(f => {
-                const count = f ? Object.keys(f).filter(k => f[k]).length : 0;
-                document.getElementById('following-count').innerText = count;
+        function authNode() {
+            const a = document.getElementById('node-alias').value;
+            const p = document.getElementById('node-pass').value;
+            user.auth(a, p, (ack) => {
+                if (ack.err) user.create(a, p, () => {
+                    user.auth(a, p, () => location.reload());
+                });
+                else location.reload();
             });
         }
 
-        function openDirect(name) {
+        function openChat(name) {
             if(!name || name === myNick) return;
             activeChat = name;
             document.getElementById('chat-modal').classList.remove('hidden');
-            document.getElementById('chat-target-name').innerText = name;
+            document.getElementById('chat-title').innerText = name;
             document.getElementById('chat-msgs').innerHTML = "";
             const chatId = [myNick, name].sort().join('_');
-            gun.get('rf_dm_v16').get(chatId).map().once((m) => {
+            gun.get('rf_dm_v17').get(chatId).map().once(m => {
                 if(!m || !m.txt) return;
-                const h = `<div class="p-4 rounded-3xl text-xs max-w-[85%] ${m.by === myNick ? 'bg-black text-white self-end' : 'bg-gray-100 text-black self-start'}">${m.txt}</div>`;
+                const h = `<div class="p-4 rounded-3xl text-xs max-w-[85%] ${m.by===myNick?'bg-black text-white self-end':'bg-gray-100 self-start'}">${m.txt}</div>`;
                 document.getElementById('chat-msgs').insertAdjacentHTML('beforeend', h);
                 document.getElementById('chat-msgs').scrollTop = 99999;
             });
@@ -277,37 +294,26 @@
         function sendDM() {
             const i = document.getElementById('dm-input');
             const chatId = [myNick, activeChat].sort().join('_');
-            gun.get('rf_dm_v16').get(chatId).set({ by: myNick, txt: i.value });
+            gun.get('rf_dm_v17').get(chatId).set({ by: myNick, txt: i.value });
             i.value = "";
         }
 
-        function broadcastAlert() {
-            const txt = document.getElementById('global-input').value;
-            if(txt) gun.get('rf_global_v16').put({txt: txt, at: Date.now()});
-            document.getElementById('global-input').value = "";
+        function sendEmpireBroadcast() {
+            const txt = document.getElementById('broadcast-msg').value;
+            if(txt) gun.get('rf_global_v17').put({txt: txt, at: Date.now()});
+            document.getElementById('broadcast-msg').value = "";
         }
 
-        function donateGEM() {
-            navigator.clipboard.writeText(WALLET).then(() => alert("Bybit USDT Address (TRC20) Copied!"));
+        function copyWallet() {
+            navigator.clipboard.writeText(WALLET).then(() => alert("Bybit Address (TRC20) Copied!"));
         }
 
         function showPage(id) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active-page'));
             document.getElementById('p-'+id).classList.add('active-page');
-            document.getElementById('header-title').innerText = id;
+            document.getElementById('header-title').innerText = id.toUpperCase();
             lucide.createIcons();
         }
     </script>
-
-    <!-- AUTH SCREEN -->
-    <div id="auth-screen" class="fixed inset-0 bg-white z-[9000] p-10 flex flex-col justify-center hidden">
-        <h2 class="text-6xl font-black italic tracking-tighter mb-2">RF</h2>
-        <p class="text-[10px] font-bold uppercase tracking-[0.3em] text-gray-400 mb-12 text-center">Supreme Empire Protocol</p>
-        <div class="space-y-4">
-            <input type="text" id="node-alias" class="w-full p-6 bg-gray-50 rounded-[24px] font-bold border-none outline-none" placeholder="Username">
-            <input type="password" id="node-pass" class="w-full p-6 bg-gray-50 rounded-[24px] font-bold border-none outline-none" placeholder="Secret Key">
-            <button onclick="initNode()" class="w-full p-6 bg-black text-white rounded-[24px] font-black shadow-2xl active:scale-95 transition">АКТИВИРОВАТЬ</button>
-        </div>
-    </div>
 </body>
 </html>
